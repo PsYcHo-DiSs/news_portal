@@ -48,7 +48,28 @@ class Post(db.Model):
 @app.route('/index')
 def index():
     """Главная страница"""
-    return render_template('news/index.html', title='Главная')
+    posts = Post.query.all()
+    categories = Category.query.all()
+    return render_template('news/index.html',
+                           title='Главная',
+                           categories=categories,
+                           posts=posts)
+
+
+@app.route('/category/<int:id>')
+def category_list(id: int):
+    """Возврат ответа на нажатие кнопок категорий"""
+    # все имеющиеся категории
+    categories = Category.query.all()
+    # фильтруем имеющиеся посты согласно подставляемому id
+    posts = Post.query.filter(Post.category_id == id)
+    # current это название категории (которая уходит в тайтл тэг)
+    current = Category.query.get(id)
+    return render_template('news/index.html',
+                           title=current,
+                           categories=categories,
+                           posts=posts,
+                           current=current)
 
 
 if __name__ == '__main__':
