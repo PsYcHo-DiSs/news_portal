@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+{{ post.title }}
+{% endblock title %}
+
+
+{% block body %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            {{ post.category.title }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title text-center">{{ post.title }}</h5>
+            <p class="card-text">{{ post.content }}</p>
+        </div>
+        <div class="card-footer text-muted">
+            {{ post.created }}
+        </div>
+    </div>
+</div>
+{% endblock body %}
