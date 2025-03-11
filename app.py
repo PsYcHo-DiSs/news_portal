@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 
 # create the extension
@@ -84,10 +84,23 @@ def post_detail(id: int):
     return render_template('news/post_detail.html', post=post)
 
 
+@app.route('/search/', methods=['GET'])
+def search_result():
+    """Функционал для поиска"""
+    q = request.args.get('q')
+    categories = Category.query.all()
+    # search = Post.title.contains(q) | Post.content.contains(q)
+    search = (Post.title.ilike(f'%{q}%') | Post.content.ilike(f'%{q}%'))
+    posts = Post.query.filter(search).all()
+    return render_template('news/index.html',
+                           categories=categories,
+                           posts=posts)
+
+
 # Utils
 @app.template_filter('time_filter')
 def jinja2_filter_datetime(date):
-    format_type = '%d.%m.%Y %H:%M.%S'
+    format_type = '%d.%m.%Y %H:%M:%S'
     return date.strftime(format_type)
 
 
