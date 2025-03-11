@@ -11,7 +11,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://postgres:123456@127.0.0.1/news"
 app.config['SQLALCHEMY_ECHO'] = True
 
-
 # initialize the app with the extension
 db.init_app(app)
 
@@ -66,7 +65,7 @@ def category_list(id: int):
     # фильтруем имеющиеся посты согласно подставляемому id
     posts = Post.query.filter(Post.category_id == id)
     # current это название категории (которая уходит в тайтл тэг)
-    current = Category.query.get(id) # легаси код для 1.4
+    current = Category.query.get(id)  # легаси код для 1.4
     # current = db.session.get(Category, id) - новый аналог
     return render_template('news/index.html',
                            title=current,
@@ -83,6 +82,13 @@ def post_detail(id: int):
     # post = db.session.get(Post, id)
     post = Post.query.filter(Post.id == id).first()
     return render_template('news/post_detail.html', post=post)
+
+
+# Utils
+@app.template_filter('time_filter')
+def jinja2_filter_datetime(date):
+    format_type = '%d.%m.%Y %H:%M.%S'
+    return date.strftime(format_type)
 
 
 if __name__ == '__main__':
