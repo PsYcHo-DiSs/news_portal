@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 # create the extension
@@ -45,6 +45,16 @@ class Post(db.Model):
         return self.title
 
 
+# Forms
+from wtforms import Form, StringField, TextAreaField, SelectField
+
+
+class PostForm(Form):
+    title = StringField('Заголовок статьи:')
+    content = TextAreaField('Содержимое статьи:', render_kw={'rows': 15})
+    category = SelectField('Категория:', choices=[])
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -65,8 +75,8 @@ def category_list(id: int):
     # фильтруем имеющиеся посты согласно подставляемому id
     posts = Post.query.filter(Post.category_id == id)
     # current это название категории (которая уходит в тайтл тэг)
-    current = Category.query.get(id)  # легаси код для 1.4
-    # current = db.session.get(Category, id) - новый аналог
+    # current = Category.query.get(id)  # легаси код для 1.4
+    current = db.session.get(Category, id) # новый аналог
     return render_template('news/index.html',
                            title=current,
                            categories=categories,
@@ -102,6 +112,23 @@ def search_result():
 @app.errorhandler(404)
 def page404(e):
     return render_template('news/404.html'), 404
+
+
+@app.route('/post/create', methods=['POST', 'GET'])
+def create_post():
+    form = PostForm()
+    form.category.choices = [c.title for c in Category.query.all()]
+    # Логика обработки запроса
+    if request.method == 'POST':
+        category_id = Category.query.filter_by(title=form.category.data).first().id
+        post = Post(title=form.title.data, content=form.content.data, category_id=category_id)
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('category_list', id=category_id))
+
+    # # Отправка данных для отображения формы
+    return render_template('news/create_post.html', form=form)
+
 
 
 # Utils
