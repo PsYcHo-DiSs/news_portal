@@ -1,3 +1,6 @@
+from werkzeug.utils import secure_filename
+import os
+
 from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -11,6 +14,10 @@ app = Flask(__name__)
 # configure the Postgres database
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://postgres:123456@127.0.0.1/news"
 app.config['SQLALCHEMY_ECHO'] = True
+UPLOAD_FOLDER = 'static/images'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SECRET_KEY'] = '555_777'
+app.config['WTF_CSRF_ENABLED'] = True
 
 # initialize the app with the extension
 db.init_app(app)
@@ -49,10 +56,11 @@ class Post(db.Model):
 
 
 # Forms
+from flask_wtf import FlaskForm
 from wtforms import Form, StringField, TextAreaField, SelectField, FileField
 
 
-class PostForm(Form):
+class PostForm(FlaskForm):
     title = StringField('Заголовок статьи:')
     content = TextAreaField('Содержимое статьи:', render_kw={'rows': 15})
     category = SelectField('Категория:', choices=[])
@@ -125,7 +133,22 @@ def create_post():
     # Логика обработки запроса
     if request.method == 'POST':
         category_id = Category.query.filter_by(title=form.category.data).first().id
-        post = Post(title=form.title.data, content=form.content.data, category_id=category_id)
+
+        picture_file = form.picture.data
+
+        picture_name = None  # По умолчанию пустое значение
+        if picture_file:
+            picture_name = secure_filename(picture_file.filename)
+            picture_path = os.path.join(app.config['UPLOAD_FOLDER'], picture_name)
+
+            # Сохраняем сам файл
+            picture_file.save(picture_path)
+
+        post = Post(title=form.title.data,
+                    content=form.content.data,
+                    category_id=category_id,
+                    picture=picture_name)
+
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('category_list', id=category_id))

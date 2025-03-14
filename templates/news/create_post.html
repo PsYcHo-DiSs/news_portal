@@ -7,17 +7,20 @@
 
 
 {% block body %}
-<form action="{{ url_for('create_post') }}" method="POST">
+<form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
     <div class="d-flex justify-content-center">
         <div class="col-md-8">
             <h2 class="text-center">
                 Добавление новой статьи
             </h2>
             {% for field in form %}
-            <div class="card-body">
-                {{ field.label() }}
-                {{ field(class='form-control') }}
-            </div>
+                {% if field.name != 'csrf_token' %}
+                    <div class="card-body">
+                        {{ field.label }}
+                        {{ field(class='form-control') }}
+                    </div>
+                {% endif %}
             {% endfor %}
             <button type="submit" class="btn btn-success btn-lg">
                 Добавить статью
