@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 # create the extension
 db = SQLAlchemy()
@@ -13,6 +14,7 @@ app.config['SQLALCHEMY_ECHO'] = True
 
 # initialize the app with the extension
 db.init_app(app)
+migrate = Migrate(app, db)
 
 # Create Model
 from datetime import datetime
@@ -40,19 +42,21 @@ class Post(db.Model):
     created = db.Column(db.DateTime, default=datetime.now())
     category_id = mapped_column(ForeignKey('category.id'))
     category = db.relationship('Category', back_populates='posts')
+    picture = db.Column(db.String(), nullable=True)
 
     def __repr__(self):
         return self.title
 
 
 # Forms
-from wtforms import Form, StringField, TextAreaField, SelectField
+from wtforms import Form, StringField, TextAreaField, SelectField, FileField
 
 
 class PostForm(Form):
     title = StringField('Заголовок статьи:')
     content = TextAreaField('Содержимое статьи:', render_kw={'rows': 15})
     category = SelectField('Категория:', choices=[])
+    picture = FileField('Картинка для статьи')
 
 
 @app.route('/')
@@ -76,7 +80,7 @@ def category_list(id: int):
     posts = Post.query.filter(Post.category_id == id)
     # current это название категории (которая уходит в тайтл тэг)
     # current = Category.query.get(id)  # легаси код для 1.4
-    current = db.session.get(Category, id) # новый аналог
+    current = db.session.get(Category, id)  # новый аналог
     return render_template('news/index.html',
                            title=current,
                            categories=categories,
@@ -128,7 +132,6 @@ def create_post():
 
     # # Отправка данных для отображения формы
     return render_template('news/create_post.html', form=form)
-
 
 
 # Utils
