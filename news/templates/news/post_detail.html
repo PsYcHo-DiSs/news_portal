@@ -12,7 +12,12 @@
         <div class="card-header d-flex justify-content-between">
             {{ post.category.title }}
             <div>
-                <a href="#!" class="btn btn-outline-danger">Удалить</a>
+                <form action="{{ url_for('delete_post', id=post.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline-danger"
+                            onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">
+                        Удалить
+                    </button>
+                </form>
                 <a href="#!" class="btn btn-outline-success">Редактировать</a>
                 <a href="#!" class="btn btn-outline-info">Назад</a>
             </div>

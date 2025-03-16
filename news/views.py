@@ -2,7 +2,7 @@ import os
 import uuid as uuid
 from werkzeug.utils import secure_filename
 
-from flask import render_template, request, abort, redirect, url_for
+from flask import render_template, request, abort, redirect, url_for, flash
 
 from news import db, app
 from news.forms import PostForm
@@ -100,6 +100,22 @@ def create_post():
     return render_template('news/create_post.html', form=form)
 
 
+@app.route('/post/<int:id>/delete', methods=['POST'])
+def delete_post(id: int):
+    """Удаление поста"""
+    post_to_delete = db.session.get(Post, id)
+    if not post_to_delete:
+        flash("Пост не найден или уже удалён", "error")
+        abort(404)
+
+    category_id = post_to_delete.category_id
+    db.session.delete(post_to_delete)
+    db.session.commit()
+
+    return redirect(url_for('category_list', id=category_id))
+
+
+# Utils
 @app.template_filter('time_filter')
 def jinja2_filter_datetime(date):
     format_type = '%d.%m.%Y %H:%M:%S'
