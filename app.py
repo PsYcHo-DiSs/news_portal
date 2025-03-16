@@ -1,5 +1,6 @@
-from werkzeug.utils import secure_filename
 import os
+import uuid as uuid
+from werkzeug.utils import secure_filename
 
 from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -139,6 +140,7 @@ def create_post():
         picture_name = None  # По умолчанию пустое значение
         if picture_file:
             picture_name = secure_filename(picture_file.filename)
+            picture_name = str(uuid.uuid4()) + '_' + picture_name
             picture_path = os.path.join(app.config['UPLOAD_FOLDER'], picture_name)
 
             # Сохраняем сам файл
