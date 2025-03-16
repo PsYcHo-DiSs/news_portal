@@ -2,70 +2,11 @@ import os
 import uuid as uuid
 from werkzeug.utils import secure_filename
 
-from flask import Flask, render_template, request, abort, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask import render_template, request, abort, redirect, url_for
 
-# create the extension
-db = SQLAlchemy()
-
-# create the app
-app = Flask(__name__)
-
-# configure the Postgres database
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://postgres:123456@127.0.0.1/news"
-app.config['SQLALCHEMY_ECHO'] = True
-UPLOAD_FOLDER = 'static/images'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = '555_777'
-app.config['WTF_CSRF_ENABLED'] = True
-
-# initialize the app with the extension
-db.init_app(app)
-migrate = Migrate(app, db)
-
-# Create Model
-from datetime import datetime
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import mapped_column
-
-
-class Category(db.Model):
-    """Категории постов"""
-    __tablename__ = 'category'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150))
-    posts = db.relationship('Post', back_populates='category')
-
-    def __repr__(self):
-        return self.title
-
-
-class Post(db.Model):
-    """Новостные посты"""
-    __tablename__ = 'post'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150))
-    content = db.Column(db.Text)
-    created = db.Column(db.DateTime, default=datetime.now())
-    category_id = mapped_column(ForeignKey('category.id'))
-    category = db.relationship('Category', back_populates='posts')
-    picture = db.Column(db.String(), nullable=True)
-
-    def __repr__(self):
-        return self.title
-
-
-# Forms
-from flask_wtf import FlaskForm
-from wtforms import Form, StringField, TextAreaField, SelectField, FileField
-
-
-class PostForm(FlaskForm):
-    title = StringField('Заголовок статьи:')
-    content = TextAreaField('Содержимое статьи:', render_kw={'rows': 15})
-    category = SelectField('Категория:', choices=[])
-    picture = FileField('Картинка для статьи')
+from news import db, app
+from news.forms import PostForm
+from news.models import Post, Category
 
 
 @app.route('/')
@@ -159,12 +100,7 @@ def create_post():
     return render_template('news/create_post.html', form=form)
 
 
-# Utils
 @app.template_filter('time_filter')
 def jinja2_filter_datetime(date):
     format_type = '%d.%m.%Y %H:%M:%S'
     return date.strftime(format_type)
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host='192.168.0.160', port=8000)
