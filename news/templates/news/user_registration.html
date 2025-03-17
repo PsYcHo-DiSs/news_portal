@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Регистрация
+{% endblock title %}
+
+{% block body %}
+<form action="{{ url_for('user_registration') }}" method="POST">
+    {{ form.hidden_tag() }}
+    <div class="d-flex justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-center">
+                Регистрация пользователя
+            </h2>
+            {% for field in form %}
+            {% if field.name != 'csrf_token' %}
+            <div class="card-body">
+                {{ field.label }}
+                {{ field(class='form-control') }}
+            </div>
+            {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-success btn-lg">
+                Зарегистрировать
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock body %}
+
+

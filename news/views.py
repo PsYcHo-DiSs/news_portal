@@ -3,10 +3,33 @@ import uuid as uuid
 from werkzeug.utils import secure_filename
 
 from flask import render_template, request, abort, redirect, url_for, flash
+from sqlalchemy.exc import IntegrityError
 
 from news import db, app
 from news.forms import PostForm
 from news.models import Post, Category
+from news.forms import Registration
+from news.models import Users
+
+
+@app.route('/registration', methods=['POST', 'GET'])
+def user_registration():
+    form = Registration()
+    if request.method == 'POST' and form.validate():
+        user = Users(first_name=form.first_name.data,
+                     last_name=form.last_name.data,
+                     username=form.username.data,
+                     phone=form.phone.data,
+                     email=form.email.data,
+                     password=form.password.data)
+        try:
+            db.session.add(user)
+            db.session.flush()
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+    return render_template('news/user_registration.html', form=form)
 
 
 @app.route('/')
@@ -142,7 +165,6 @@ def update_post(id: int):
         return redirect(url_for('post_detail', id=id))
 
     return render_template('news/create_post.html', form=form, id=id)
-
 
 
 # Utils
