@@ -1,6 +1,7 @@
 import os
 import uuid as uuid
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 
 from flask import render_template, request, abort, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
@@ -16,12 +17,13 @@ from news.models import Users
 def user_registration():
     form = Registration()
     if request.method == 'POST' and form.validate():
+        password_hash = generate_password_hash(form.password.data, method='scrypt')
         user = Users(first_name=form.first_name.data,
                      last_name=form.last_name.data,
                      username=form.username.data,
                      phone=form.phone.data,
                      email=form.email.data,
-                     password=form.password.data)
+                     password=password_hash)
         try:
             db.session.add(user)
             db.session.flush()

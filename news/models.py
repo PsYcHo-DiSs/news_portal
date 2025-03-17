@@ -42,7 +42,7 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True)
     bio = db.Column(db.String(300), nullable=True)
     photo = db.Column(db.String(), nullable=True)
-    password = db.Column(db.String(150))
+    password = db.Column(db.String(200))
     is_staff = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
