@@ -18,7 +18,7 @@
                         Удалить
                     </button>
                 </form>
-                <a href="#!" class="btn btn-outline-success">Редактировать</a>
+                <a href="{{ url_for('update_post', id=post.id) }}" class="btn btn-outline-success">Редактировать</a>
                 <a href="{{ url_for('category_list', id=post.category.id) }}" class="btn btn-outline-info">Назад</a>
             </div>
         </div>

@@ -7,25 +7,37 @@
 
 
 {% block body %}
-<form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    <div class="d-flex justify-content-center">
-        <div class="col-md-8">
-            <h2 class="text-center">
-                Добавление новой статьи
-            </h2>
-            {% for field in form %}
+{% if 'update' in request.path %}
+<form action="{{ url_for('update_post', id=id) }}" method="POST" enctype="multipart/form-data">
+    {% else %}
+    <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+        {% endif %}
+        {{ form.hidden_tag() }}
+        <div class="d-flex justify-content-center">
+            <div class="col-md-8">
+                <h2 class="text-center">
+                    {% if 'update' in request.path %}
+                    Редактирование статьи
+                    {% else %}
+                    Добавление новой статьи
+                    {% endif %}
+                </h2>
+                {% for field in form %}
                 {% if field.name != 'csrf_token' %}
-                    <div class="card-body">
-                        {{ field.label }}
-                        {{ field(class='form-control') }}
-                    </div>
+                <div class="card-body">
+                    {{ field.label }}
+                    {{ field(class='form-control') }}
+                </div>
                 {% endif %}
-            {% endfor %}
-            <button type="submit" class="btn btn-success btn-lg">
-                Добавить статью
-            </button>
+                {% endfor %}
+                <button type="submit" class="btn btn-success btn-lg">
+                    {% if 'update' in request.path %}
+                        Применить изменения
+                    {% else %}
+                        Добавить статью
+                    {% endif %}
+                </button>
+            </div>
         </div>
-    </div>
-</form>
-{% endblock body %}
+    </form>
+    {% endblock body %}

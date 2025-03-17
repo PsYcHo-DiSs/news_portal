@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://postgres:123456@127.0.0.1/news"
 # app.config['SQLALCHEMY_ECHO'] = True
 
-UPLOAD_FOLDER = 'static/images'
+UPLOAD_FOLDER = 'news/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.config['SECRET_KEY'] = '555_777'

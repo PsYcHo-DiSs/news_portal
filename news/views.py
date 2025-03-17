@@ -115,6 +115,36 @@ def delete_post(id: int):
     return redirect(url_for('category_list', id=category_id))
 
 
+@app.route('/post/<int:id>/update', methods=['POST', 'GET'])
+def update_post(id: int):
+    """Функция редактирования поста"""
+    post = db.session.get(Post, id)
+    form = PostForm(obj=post)
+    form.category.choices = [c.title for c in Category.query.all()]
+
+    if request.method == 'POST':
+        category_id = Category.query.filter_by(title=form.category.data).first().id
+        post.category_id = category_id
+        post.title = form.title.data
+        post.content = form.content.data
+
+        picture_file = form.picture.data
+        if picture_file:
+            picture_name = secure_filename(picture_file.filename)
+            picture_name = str(uuid.uuid4()) + '_' + picture_name
+            picture_path = os.path.join(app.config['UPLOAD_FOLDER'], picture_name)
+
+            picture_file.save(picture_path)
+            post.picture = picture_name
+
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('post_detail', id=id))
+
+    return render_template('news/create_post.html', form=form, id=id)
+
+
+
 # Utils
 @app.template_filter('time_filter')
 def jinja2_filter_datetime(date):
