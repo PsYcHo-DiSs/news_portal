@@ -1,6 +1,9 @@
+from typing import Optional
+
 from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column
+from flask_login import UserMixin
 
 from news import db
 
@@ -31,19 +34,19 @@ class Post(db.Model):
         return self.title
 
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     """Для профайла пользователя"""
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    phone = db.Column(db.String(50), nullable=True)
-    email = db.Column(db.String(100), unique=True)
-    bio = db.Column(db.String(300), nullable=True)
-    photo = db.Column(db.String(), nullable=True)
-    password = db.Column(db.String(200))
-    is_staff = db.Column(db.Boolean, default=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    username: str = db.Column(db.String(50), unique=True)
+    first_name: str = db.Column(db.String(100))
+    last_name: str = db.Column(db.String(100))
+    phone: Optional[str] = db.Column(db.String(50), nullable=True)
+    email: str = db.Column(db.String(100), unique=True)
+    bio: Optional[str] = db.Column(db.String(300), nullable=True)
+    photo: Optional[str] = db.Column(db.String(), nullable=True)
+    password: str = db.Column(db.String(200))
+    is_staff: bool = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return self.username

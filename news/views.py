@@ -2,15 +2,48 @@ import os
 import uuid as uuid
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 
 from flask import render_template, request, abort, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
+from flask_login import LoginManager, login_user, logout_user
 
 from news import db, app
 from news.forms import PostForm
 from news.models import Post, Category
 from news.forms import Registration
 from news.models import Users
+from news.forms import UserLogin
+
+# Flask Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'user_login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Чекер пользователя, по документации"""
+    return db.session.get(Users, int(user_id))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def user_login():
+    """Аутентификация пользователя"""
+    form = UserLogin()
+    if request.method == 'POST':
+        user = Users.query.filter_by(username=form.username.data).first()
+        if user and check_password_hash(user.password, form.password.data):
+            login_user(user)
+            return redirect(url_for('index'))
+        flash("Неверный логин или пароль", "error")
+    return render_template('news/user_login.html', form=form)
+
+
+@app.route('/logout', methods=['POST', 'GET'])
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 @app.route('/registration', methods=['POST', 'GET'])

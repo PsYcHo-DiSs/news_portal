@@ -22,3 +22,9 @@ class Registration(FlaskForm):
                                            validators.EqualTo('confirm',
                                                               message='Пароли должны совпадать!')])
     confirm = PasswordField('Подтверждение пароля: *', [validators.DataRequired()])
+
+
+class UserLogin(FlaskForm):
+    """Форма для авторизации пользователя"""
+    username = StringField('Логин')
+    password = PasswordField('Пароль')

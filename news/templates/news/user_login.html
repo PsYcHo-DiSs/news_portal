@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Войти
+{% endblock title %}
+
+{% block body %}
+<form action="{{ url_for('user_login') }}" method="POST">
+    {{ form.hidden_tag() }}
+    <div class="d-flex justify-content-center shadow bg-white rounded">
+        <div class="col-md-8">
+
+            {% for field in form %}
+            {% if field.name != 'csrf_token' %}
+            <div class="card-body">
+                {{ field.label }}
+                {{ field(class='form-control') }}
+            </div>
+            {% endif %}
+            {% endfor %}
+            <br>
+            <button type="submit" class="btn btn-success btn-lg">
+                Войти
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock body %}
