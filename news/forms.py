@@ -28,3 +28,14 @@ class UserLogin(FlaskForm):
     """Форма для авторизации пользователя"""
     username = StringField('Логин')
     password = PasswordField('Пароль')
+
+
+class UpdateUserProfile(FlaskForm):
+    """Форма для редактирования профайла пользователя"""
+    username = StringField("Логин: *", [validators.DataRequired()])
+    first_name = StringField('Имя: *', [validators.DataRequired()])
+    last_name = StringField('Фамилия: *', [validators.DataRequired()])
+    phone = StringField('Контактный телефон:')
+    email = StringField('Почта: *', [validators.DataRequired()])
+    bio = TextAreaField('БИО:', render_kw={'rows': 5})
+    photo = FileField('Аватарка')

@@ -50,7 +50,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#">Админка</a></li>
-                                <li><a class="dropdown-item" href="#">Моя страничка</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('user_profile', id=current_user.id) }}">Моя страничка</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('create_post') }}">Добавить статью</a>
                                 </li>
                                 <li>

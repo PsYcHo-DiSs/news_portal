@@ -1,17 +1,18 @@
 import os
 import uuid as uuid
+
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
 from flask import render_template, request, abort, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from news import db, app
 from news.forms import PostForm
 from news.models import Post, Category
-from news.forms import Registration
+from news.forms import Registration, UpdateUserProfile
 from news.models import Users
 from news.forms import UserLogin
 
@@ -71,6 +72,73 @@ def user_registration():
             flash("Пользователь с такими данными существует!", "error")
 
     return render_template('news/user_registration.html', form=form)
+
+
+@app.route('/profile/<int:id>')
+@login_required
+def user_profile(id: int):
+    """Профайл пользователя"""
+    user = db.session.get(Users, id)
+    if not user:
+        flash("Пользователя с таким id не существует", "error")
+        return redirect(url_for('index'))
+    return render_template('news/user_profile.html', user=user)
+
+
+@app.route('/profile/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_user(id: int):
+    """Удаление пользователя"""
+    user_to_delete = db.session.get(Users, id)
+    if not user_to_delete:
+        flash("Пользователь не найден или уже удалён", "error")
+        abort(404)
+    if current_user.id != user_to_delete.id:
+        flash("Вы не имеете таких полномочий", "error")
+        abort(403)
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    flash(f"Профайл {user_to_delete.username} успешно удалён!", 'success')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/profile/<int:id>/update', methods=['POST', 'GET'])
+@login_required
+def update_user(id: int):
+    """Логика для редактирования пользователя"""
+    user = db.session.get(Users, id)
+    form = UpdateUserProfile(obj=user)
+    if current_user.id != user.id:
+        flash("Вы не имеете таких полномочий", "error")
+        abort(403)
+    if request.method == 'POST':
+        user.username = form.username.data
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        user.phone = form.phone.data
+        user.email = form.email.data
+        user.bio = form.bio.data
+
+        avatar_file = form.photo.data
+        if avatar_file:
+            avatar_name = secure_filename(avatar_file.filename)
+            avatar_name = str(uuid.uuid4()) + '_' + avatar_name
+            avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], avatar_name)
+
+            avatar_file.save(avatar_path)
+            user.photo = avatar_name
+
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash("Информация о пользователе успешно отредактирована!", "success")
+            return redirect(url_for('user_profile', id=user.id))
+        except IntegrityError:
+            db.session.rollback()
+            flash("Пользователь с такими данными существует!", "error")
+
+    return render_template('news/edit_user_profile.html', form=form, id=id)
 
 
 @app.route('/')
@@ -134,6 +202,11 @@ def search_result():
 @app.errorhandler(404)
 def page404(e):
     return render_template('news/404.html'), 404
+
+
+@app.errorhandler(403)
+def page403(e):
+    return render_template('news/403.html'), 403
 
 
 @app.route('/post/create', methods=['POST', 'GET'])
