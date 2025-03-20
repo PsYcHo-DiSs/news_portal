@@ -35,8 +35,11 @@ def user_login():
         user = Users.query.filter_by(username=form.username.data).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
+            flash("Вы успешно вошли в систему", "success")
             return redirect(url_for('index'))
-        flash("Неверный логин или пароль", "error")
+        else:
+            flash("Неверный логин или пароль", "error")
+
     return render_template('news/user_login.html', form=form)
 
 
@@ -61,8 +64,11 @@ def user_registration():
             db.session.add(user)
             db.session.flush()
             db.session.commit()
+            flash("Аккаунт успешно создан, пожалуйста, войдите в учётную запись!")
+            return redirect(url_for('user_login'))
         except IntegrityError:
             db.session.rollback()
+            flash("Пользователь с такими данными существует!", "error")
 
     return render_template('news/user_registration.html', form=form)
 
@@ -114,7 +120,11 @@ def search_result():
     # search = Post.title.contains(q) | Post.content.contains(q)
     search = (Post.title.ilike(f'%{q}%') | Post.content.ilike(f'%{q}%'))
     posts = Post.query.filter(search).all()
-    if not posts:
+
+    if posts:
+        flash("Информация найдена в системе!", 'success')
+    else:
+        flash("Искомой информации не найдено!", "error")
         abort(404)
     return render_template('news/index.html',
                            categories=categories,
@@ -153,6 +163,7 @@ def create_post():
 
         db.session.add(post)
         db.session.commit()
+        flash(f"Статья {form.title.data} успешно создана!", "success")
         return redirect(url_for('category_list', id=category_id))
 
     # # Отправка данных для отображения формы
@@ -171,6 +182,7 @@ def delete_post(id: int):
     category_id = post_to_delete.category_id
     db.session.delete(post_to_delete)
     db.session.commit()
+    flash(f"Статья {post_to_delete.title} успешно удалена!")
 
     return redirect(url_for('category_list', id=category_id))
 
