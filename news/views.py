@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 
 from flask import render_template, request, abort, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
-from flask_login import LoginManager, login_user, logout_user
+from flask_login import LoginManager, login_user, logout_user, login_required
 
 from news import db, app
 from news.forms import PostForm
@@ -127,6 +127,7 @@ def page404(e):
 
 
 @app.route('/post/create', methods=['POST', 'GET'])
+@login_required
 def create_post():
     form = PostForm()
     form.category.choices = [c.title for c in Category.query.all()]
@@ -159,6 +160,7 @@ def create_post():
 
 
 @app.route('/post/<int:id>/delete', methods=['POST'])
+@login_required
 def delete_post(id: int):
     """Удаление поста"""
     post_to_delete = db.session.get(Post, id)
@@ -174,6 +176,7 @@ def delete_post(id: int):
 
 
 @app.route('/post/<int:id>/update', methods=['POST', 'GET'])
+@login_required
 def update_post(id: int):
     """Функция редактирования поста"""
     post = db.session.get(Post, id)
