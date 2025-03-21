@@ -5,7 +5,7 @@
 {% endblock title %}
 
 {% block body %}
-<section style="background-color: #eee;">
+<section style="background-color: #d0e9f1;">
     <br>
     <div class="row">
         <div class="col-lg-4">
@@ -25,12 +25,12 @@
                         {% if current_user.id == user.id %}
                         <form action="{{ url_for('delete_user', id=user.id) }}" method="post" style="display:inline;">
                             <button type="submit" class="btn btn-outline-danger"
-                                onclick="return confirm('Вы уверены, что хотите удалить свой профайл?');">
+                                    onclick="return confirm('Вы уверены, что хотите удалить свой профайл?');">
                                 Удалить профайл
                             </button>
                         </form>
-<!--                        <a href="{{ url_for('delete_user', id=user.id) }}" class="btn btn-outline-danger ms-1">Удалить профайл</a>-->
-                        <a href="{{ url_for('update_user', id=user.id) }}" class="btn btn-outline-success ms-1"> Редактировать профайл</a>
+                        <a href="{{ url_for('update_user', id=user.id) }}" class="btn btn-outline-success ms-1">
+                            Редактировать профайл</a>
                         {% endif %}
                     </div>
                 </div>
@@ -64,9 +64,9 @@
                         </div>
                         <div class="col-sm-9">
                             {% if current_user.id == user.id %}
-                                <p class="text-muted mb-0">{{ user.email }}</p>
+                            <p class="text-muted mb-0">{{ user.email }}</p>
                             {% else %}
-                                <p class="text-muted mb-0">Информация скрыта</p>
+                            <p class="text-muted mb-0">Информация скрыта</p>
                             {% endif %}
                         </div>
                     </div>
