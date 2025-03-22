@@ -13,22 +13,25 @@ from news.models import Category, Post, Users
 
 
 def prefix_name(obj, file_data):
+    """Преобразование имени файла, приведение к уникальности"""
     parts = os.path.splitext(file_data.filename)
     return secure_filename(f'{uuid.uuid4()}_%s%s' % parts)
 
 
 class AdminAccess(AdminIndexView):
     def is_accessible(self):
+        """Логика доступности для конкретного пользователя"""
         if not current_user.is_anonymous:
             return current_user.is_staff
 
     def inaccessible_callback(self, name, **kwargs):
+        """Срабатывает, если у пользователя нет доступа"""
         flash("У вас нет полномочий для входа в админ панель!", "error")
         return redirect(url_for('index'))
 
 
 class PostAdmin(ModelView):
-    form_columns = ['title', 'content', 'category', 'picture']
+    form_columns = ['title', 'content', 'category', 'picture', 'author_id']
 
     form_extra_fields = {
         'picture': FileUploadField('picture',

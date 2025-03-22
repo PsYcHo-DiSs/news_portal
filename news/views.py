@@ -232,7 +232,8 @@ def create_post():
         post = Post(title=form.title.data,
                     content=form.content.data,
                     category_id=category_id,
-                    picture=picture_name)
+                    picture=picture_name,
+                    author=current_user)
 
         db.session.add(post)
         db.session.commit()
