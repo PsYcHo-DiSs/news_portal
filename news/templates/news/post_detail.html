@@ -39,6 +39,9 @@
         <div class="card-footer text-muted">
             <!--            {{ post.created.strftime('%d.%m.%Y %H:%M:%S') }}-->
             {{ post.created | time_filter }}
+            {% if post.author %}
+            Автор: <a href="{{ url_for('user_profile', id=post.author.id) }}">{{ post.author }}</a>
+            {% endif %}
         </div>
     </div>
 </div>
